@@ -29,3 +29,28 @@ func TestCalorieCount(t *testing.T) {
 		t.Errorf("expected %d, got %d", expected, result)
 	}
 }
+
+func TestTop3CalorieCount(t *testing.T) {
+	input := `
+1000
+2000
+3000
+
+4000
+
+5000
+6000
+
+7000
+8000
+9000
+
+10000`
+
+	expected := 45000
+	result := Top3CalorieCount(strings.NewReader(input))
+
+	if expected != result {
+		t.Errorf("expected %d, got %d", expected, result)
+	}
+}
