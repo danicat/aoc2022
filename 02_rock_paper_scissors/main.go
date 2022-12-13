@@ -17,35 +17,69 @@ var scores map[string]int
 func init() {
 	moves = make(map[string]map[string]int)
 
-	// A = Rock, X = Rock
-	// B = Paper, Y = Paper
-	// C = Scissors, Z = Scissors
 	moves["A"] = map[string]int{
-		"X": 3,
-		"Y": 6,
-		"Z": 0,
+		"A": 3,
+		"B": 6,
+		"C": 0,
 	}
 
 	moves["B"] = map[string]int{
-		"X": 0,
-		"Y": 3,
-		"Z": 6,
+		"A": 0,
+		"B": 3,
+		"C": 6,
 	}
 
 	moves["C"] = map[string]int{
-		"X": 6,
-		"Y": 0,
-		"Z": 3,
+		"A": 6,
+		"B": 0,
+		"C": 3,
 	}
 
 	scores = map[string]int{
-		"X": 1,
-		"Y": 2,
-		"Z": 3,
+		"A": 1,
+		"B": 2,
+		"C": 3,
 	}
 }
 
-func RockPaperScissors(input io.Reader) int {
+type strategyFn func(string, string) string
+
+func fixed(oponentMove, playerMove string) string {
+	switch playerMove {
+	case "X":
+		return "A"
+	case "Y":
+		return "B"
+	case "Z":
+		return "C"
+	}
+
+	return ""
+}
+
+func clever(opponentMove, playerMove string) string {
+	strat := map[string]map[string]string{
+		"A": { // rock
+			"X": "C", // lose
+			"Y": "A", // draw
+			"Z": "B", // win
+		},
+		"B": { // paper
+			"X": "A",
+			"Y": "B",
+			"Z": "C",
+		},
+		"C": { //scissor
+			"X": "B",
+			"Y": "C",
+			"Z": "A",
+		},
+	}
+
+	return strat[opponentMove][playerMove]
+}
+
+func RockPaperScissors(input io.Reader, strategy strategyFn) int {
 	s := bufio.NewScanner(input)
 	s.Split(bufio.ScanLines)
 
@@ -57,7 +91,9 @@ func RockPaperScissors(input io.Reader) int {
 			continue
 		}
 
-		result += moves[parts[0]][parts[1]] + scores[parts[1]]
+		playerMove := strategy(parts[0], parts[1])
+
+		result += moves[parts[0]][playerMove] + scores[playerMove]
 	}
 
 	return result
@@ -65,6 +101,7 @@ func RockPaperScissors(input io.Reader) int {
 
 func main() {
 	file := flag.String("file", "", "name of the input text file")
+	cleverStrat := flag.Bool("clever", false, "uses the clever elf strategy")
 	flag.Parse()
 
 	if *file == "" {
@@ -78,5 +115,10 @@ func main() {
 	}
 	defer f.Close()
 
-	fmt.Printf("total score: %d\n", RockPaperScissors(f))
+	strategy := fixed
+	if *cleverStrat {
+		strategy = clever
+	}
+
+	fmt.Printf("total score: %d\n", RockPaperScissors(f, strategy))
 }
