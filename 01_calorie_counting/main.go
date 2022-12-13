@@ -94,7 +94,6 @@ func main() {
 	flag.Parse()
 
 	if *file == "" {
-		// log.Fatalln("you must specify a txt file as input")
 		flag.Usage()
 		os.Exit(1)
 	}
